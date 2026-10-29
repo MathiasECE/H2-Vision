@@ -1,0 +1,27 @@
+# PlatformIO build & cache artifacts
+.pio/
+*/.pio/
+.cache/
+*/.cache/
+compile_commands.json
+*/compile_commands.json
+
+# VS Code local settings (garder extensions.json si besoin)
+.vscode/.browse.c_cpp.db*
+.vscode/c_cpp_properties.json
+.vscode/launch.json
+.vscode/ipch/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Fichiers temporaires de travail
+*.tmp
+*.log
+dom_dump.txt
+extract_symbols.py
+test_clean_mermaid.html
+test_mermaid.html
+test_mermaid_options.html

@@ -1,0 +1,13 @@
+sep=;
+Categorie;Composant;Role_Projet;Fournisseur_Autorise;Reference_Produit;Quantite;Prix_Estime_EUR;Lien_Achat_Fournisseur;Lien_Datasheet_Doc
+Electronique;ESP32-S3 DevKitC-1 N8R8;Microcontroleur central, calculs, acquisition 50Hz et transmission radio;Amazon;ESP32-S3-DevKitC-1-N8R8;1;8.5;https://www.amazon.fr/s?k=ESP32-S3-DevKitC-1;https://www.espressif.com/sites/default/files/documentation/esp32-s3_datasheet_en.pdf
+Electronique;Texas Instruments INA226 (Module I2C);Mesure tension, courant, puissance et calcul jauge Hydrogene (Faraday);Amazon;B0F3X3LB9K;1;4.5;https://www.amazon.fr/dp/B0F3X3LB9K;https://www.ti.com/lit/ds/symlink/ina226.pdf
+Electronique;Semtech SX1262 (Waveshare Core1262-868M);Transceiver radio 868 MHz pour transmission temps reel au stand;Amazon;B09MW6KD6F;2;10.0;https://www.amazon.fr/dp/B09MW6KD6F;https://www.semtech.com/products/wireless-rf/lora-core/sx1262
+Capteur;Capteur a effet Hall A3144 (KY-003);Mesure de la vitesse reelle sur arbre de transmission;Gotronic;29150 (KY003HMS);1;3.3;https://www.gotronic.fr/art-capteur-a-effet-hall-a3141-ky003hms-29150.htm;https://www.princeton.edu/~mae412/HANDOUTS/Datasheets/A3141-2-3-4.pdf
+Capteur;Thermistance CTN 10k B3950;Surveillance temperature de la pile a hydrogene H-30;Gotronic;05339;1;0.80;https://www.gotronic.fr/art-thermistance-ctn-10k-8486-3739.htm;https://www.vishay.com/docs/29049/ntcle100.pdf
+Cable;Connecteurs Tamiya Male / Femelle 14 AWG (YIXISI);Pont d alimentation entre batterie/pile et variateur ESC;Amazon;B0DCBPS6F2;1;3.5;https://www.amazon.fr/dp/B0DCBPS6F2;https://fr.wikipedia.org/wiki/Connecteur_Tamiya
+Cable;Cordon servo en Y 15cm (Dédoubleur JR/Futaba);Alimentation 5V BEC de l ESP32 et lecture gachette pilote;Amazon;B09MHHLKPR;1;2.9;https://www.amazon.fr/dp/B09MHHLKPR;https://en.wikipedia.org/wiki/Servo_control
+Cable;Nappe 10 fils Dupont Femelle-Femelle 20cm;Liaison capteur Hall vers boitier H2-Vision;Amazon;B0CWLK8D98;1;1.8;https://www.amazon.fr/dp/B0CWLK8D98;https://en.wikipedia.org/wiki/Jump_wire
+Fixation;Aimants Neodyme N48 3x1mm (Lot de disques);Pastille magnetique sur arbre de transmission tournant;Amazon;B0C9WSMWHX;1;4.0;https://www.amazon.fr/dp/B0C9WSMWHX;https://fr.wikipedia.org/wiki/Aimant_aux_terres_rares
+Fixation;Ruban adhesif polyimide Kapton 10mm;Maintien thermique sonde NTC sur pile H2 sans colle residuelle;Amazon;B0D5W86VCL;1;3.9;https://www.amazon.fr/dp/B0D5W86VCL;https://fr.wikipedia.org/wiki/Kapton
+Boitier;Boitier imprimable 3D en PETG;Protection mecanique et support clipsable sur chassis;Interne (FabLab);FABLAB-H2V-V1;1;0.0;N/A;N/A

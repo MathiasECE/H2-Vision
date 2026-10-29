@@ -1,0 +1,185 @@
+<mxfile host="Electron">
+  <diagram name="Page-1" id="tjKEU_cgC4oImrErbjQL">
+    <mxGraphModel dx="2613" dy="1227" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <UserObject label="" mermaidData="{&#xa;  &quot;data&quot;: &quot;flowchart TD\n    subgraph COL1 [\&quot;1. Capteurs sur la Voiture (Zéro soudure)\&quot;]\n        direction TB\n        C1[\&quot;⚡ Pont Tamiya\nTension &amp; Courant moteur\&quot;]\n        C2[\&quot;🧲 Aimant sur arbre central\nVitesse réelle de roulage\&quot;]\n        C3[\&quot;🌡️ Sonde NTC sur pile H2\nTempérature membrane\&quot;]\n        C4[\&quot;🎮 Câble Servo en Y\nPosition gâchette pilote\&quot;]\n        C1 --- C2 --- C3 --- C4\n    end\n\n    subgraph COL2 [\&quot;2. Boîtier H2-Vision (max 35g)\&quot;]\n        direction TB\n        B1[\&quot;🔋 Alimentation 5V BEC\n➜ Alimente le Cerveau ESP32\&quot;]\n        B2[\&quot;🧠 Cerveau ESP32-S3\n• Acquisition à 50 Hz &amp; Faraday\n➜ Pilote le LoRa en SPI\&quot;]\n        B3[\&quot;📡 Émetteur LoRa 868 MHz\n(Semtech SX1262)\&quot;]\n        B1 --- B2 --- B3\n    end\n\n    subgraph COL3 [\&quot;3. Poste de Stand (Ingénierie)\&quot;]\n        direction TB\n        S1[\&quot;📡 Récepteur radio USB\n➜ Transmet au WebSerial\&quot;]\n        S2[\&quot;💻 Dashboard Web Chrome\n• Vitesse &amp; Puissance en direct\n➜ Exporte vers le CSV\&quot;]\n        S3[\&quot;📁 Sauvegarde CSV directe\n(Stratégie d&#39;après-course)\&quot;]\n        S1 --- S2 --- S3\n    end\n\n    C4 --&gt;|Alim 5V BEC| B1\n    C1 --&gt;|I2C| B2\n    C2 --&gt;|Impulsion| B2\n    C3 --&gt;|Signal analogique| B2\n    C4 --&gt;|Signal PWM| B2\n    B3 --&gt;|Radio 868 MHz - 500m| S1\n\n    classDef car fill:#e1f5fe,stroke:#0288d1,stroke-width:2px;\n    classDef box fill:#e8f5e9,stroke:#388e3c,stroke-width:2px;\n    classDef pit fill:#fff3e0,stroke:#f57c00,stroke-width:2px;\n    class C1,C2,C3,C4 car;\n    class B1,B2,B3 box;\n    class S1,S2,S3 pit;&quot;,&#xa;  &quot;config&quot;: null&#xa;}" id="2k-QhVNp1L4ZpJLj8icC-30">
+          <mxCell connectable="0" parent="1" style="group;transparentBounds=1;editIcon=1;lockedGroup=0;groupPadding=10;" vertex="1">
+            <mxGeometry as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="1. Capteurs sur la Voiture&amp;nbsp;" mermaidId="n:COL1" mermaidBaseStyle="html=1;whiteSpace=wrap;strokeWidth=1;verticalAlign=top;fillColor=light-dark(#ffffde,#1f2020);strokeColor=light-dark(#aaaa33,#cccccc);fontColor=light-dark(#333333,#cccccc);fontFamily=Trebuchet MS,Verdana,Arial,sans-serif;fontSize=16;" mermaidBaseValue="1. Capteurs sur la Voiture (Zéro soudure)" id="2k-QhVNp1L4ZpJLj8icC-31">
+          <mxCell parent="2k-QhVNp1L4ZpJLj8icC-30" style="html=1;whiteSpace=wrap;strokeWidth=1;verticalAlign=top;fillColor=light-dark(#FFFFDE,#1F1F1F);strokeColor=light-dark(#aaaa33,#cccccc);fontColor=light-dark(#333333,#cccccc);fontFamily=Trebuchet MS,Verdana,Arial,sans-serif;fontSize=16;" vertex="1">
+            <mxGeometry height="531" width="390" x="-310" y="350" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="INA226 (I2C) – Tension &amp;amp; Courant moteur" mermaidId="n:C1" mermaidBaseStyle="html=1;whiteSpace=wrap;strokeWidth=2;fillColor=#e1f5fe;strokeColor=#0288d1;fontColor=light-dark(#333333,#cccccc);fontFamily=Trebuchet MS,Verdana,Arial,sans-serif;fontSize=16;" mermaidBaseValue="⚡ Pont Tamiya&#xa;Tension &amp; Courant moteur" id="2k-QhVNp1L4ZpJLj8icC-32">
+          <mxCell parent="2k-QhVNp1L4ZpJLj8icC-31" style="html=1;whiteSpace=wrap;strokeWidth=1;fillColor=light-dark(#E1F5FE,#181818);strokeColor=default;fontColor=light-dark(#333333,#cccccc);fontFamily=Trebuchet MS,Verdana,Arial,sans-serif;fontSize=16;" vertex="1">
+            <mxGeometry height="73" width="175.46448087431693" x="115.79234972677598" y="414" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="Capteur Hall A3144 + Aimant Néodyme – Vitesse réelle de roulage" mermaidId="n:C2" mermaidBaseStyle="html=1;whiteSpace=wrap;strokeWidth=2;fillColor=#e1f5fe;strokeColor=#0288d1;fontColor=light-dark(#333333,#cccccc);fontFamily=Trebuchet MS,Verdana,Arial,sans-serif;fontSize=16;" mermaidBaseValue="🧲 Aimant sur arbre central&#xa;Vitesse réelle de roulage" id="2k-QhVNp1L4ZpJLj8icC-33">
+          <mxCell parent="2k-QhVNp1L4ZpJLj8icC-31" style="html=1;whiteSpace=wrap;strokeWidth=1;fillColor=light-dark(#E1F5FE,#181818);strokeColor=default;fontColor=light-dark(#333333,#cccccc);fontFamily=Trebuchet MS,Verdana,Arial,sans-serif;fontSize=16;" vertex="1">
+            <mxGeometry height="73" width="186.120218579235" x="110.46448087431693" y="168" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="Thermistance NTC 10k B3950 – Température pile H2" mermaidId="n:C3" mermaidBaseStyle="html=1;whiteSpace=wrap;strokeWidth=2;fillColor=#e1f5fe;strokeColor=#0288d1;fontColor=light-dark(#333333,#cccccc);fontFamily=Trebuchet MS,Verdana,Arial,sans-serif;fontSize=16;" mermaidBaseValue="🌡️ Sonde NTC sur pile H2&#xa;Température membrane" id="2k-QhVNp1L4ZpJLj8icC-34">
+          <mxCell parent="2k-QhVNp1L4ZpJLj8icC-31" style="html=1;whiteSpace=wrap;strokeWidth=1;fillColor=light-dark(#E1F5FE,#181818);strokeColor=default;fontColor=light-dark(#333333,#cccccc);fontFamily=Trebuchet MS,Verdana,Arial,sans-serif;fontSize=16;" vertex="1">
+            <mxGeometry height="73" width="174.04371584699456" x="116.50273224043714" y="291" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="Cordon Servo en Y – Position gâchette pilote" mermaidId="n:C4" mermaidBaseStyle="html=1;whiteSpace=wrap;strokeWidth=2;fillColor=#e1f5fe;strokeColor=#0288d1;fontColor=light-dark(#333333,#cccccc);fontFamily=Trebuchet MS,Verdana,Arial,sans-serif;fontSize=16;" mermaidBaseValue="🎮 Câble Servo en Y&#xa;Position gâchette pilote" id="2k-QhVNp1L4ZpJLj8icC-35">
+          <mxCell parent="2k-QhVNp1L4ZpJLj8icC-31" style="html=1;whiteSpace=wrap;strokeWidth=1;fillColor=light-dark(#E1F5FE,#181818);strokeColor=default;fontColor=light-dark(#333333,#cccccc);fontFamily=Trebuchet MS,Verdana,Arial,sans-serif;fontSize=16;" vertex="1">
+            <mxGeometry height="73" width="164.09836065573774" x="121.47540983606558" y="45" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="2. Boîtier H2-Vision&amp;nbsp;" mermaidId="n:COL2" mermaidBaseStyle="html=1;whiteSpace=wrap;strokeWidth=1;verticalAlign=top;fillColor=light-dark(#ffffde,#1f2020);strokeColor=light-dark(#aaaa33,#cccccc);fontColor=light-dark(#333333,#cccccc);fontFamily=Trebuchet MS,Verdana,Arial,sans-serif;fontSize=16;" mermaidBaseValue="2. Boîtier H2-Vision (max 35g)" id="2k-QhVNp1L4ZpJLj8icC-36">
+          <mxCell parent="2k-QhVNp1L4ZpJLj8icC-30" style="html=1;whiteSpace=wrap;strokeWidth=1;verticalAlign=top;fillColor=light-dark(#ffffde,#1f2020);strokeColor=light-dark(#aaaa33,#cccccc);fontColor=light-dark(#333333,#cccccc);fontFamily=Trebuchet MS,Verdana,Arial,sans-serif;fontSize=16;" vertex="1">
+            <mxGeometry height="409" width="440" x="240" y="411" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <mxCell id="2k-QhVNp1L4ZpJLj8icC-37" edge="1" parent="2k-QhVNp1L4ZpJLj8icC-36" source="2k-QhVNp1L4ZpJLj8icC-38" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;endArrow=none;endFill=0;" target="2k-QhVNp1L4ZpJLj8icC-39">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <UserObject label="&lt;div&gt;Alimentation 5V&amp;nbsp;&lt;/div&gt;" mermaidId="n:B1" mermaidBaseStyle="html=1;whiteSpace=wrap;strokeWidth=2;fillColor=#e8f5e9;strokeColor=#388e3c;fontColor=light-dark(#333333,#cccccc);fontFamily=Trebuchet MS,Verdana,Arial,sans-serif;fontSize=16;" mermaidBaseValue="🔋 Alimentation 5V BEC&#xa;➜ Alimente le Cerveau ESP32" id="2k-QhVNp1L4ZpJLj8icC-38">
+          <mxCell parent="2k-QhVNp1L4ZpJLj8icC-36" style="html=1;whiteSpace=wrap;strokeWidth=1;fillColor=light-dark(#E1F5FE,#181818);strokeColor=default;fontColor=light-dark(#333333,#cccccc);fontFamily=Trebuchet MS,Verdana,Arial,sans-serif;fontSize=16;" vertex="1">
+            <mxGeometry height="73" width="172.83" x="133.58" y="45" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div&gt; ESP32-S3 – Cerveau central&lt;/div&gt;" mermaidId="n:B2" mermaidBaseStyle="html=1;whiteSpace=wrap;strokeWidth=2;fillColor=#e8f5e9;strokeColor=#388e3c;fontColor=light-dark(#333333,#cccccc);fontFamily=Trebuchet MS,Verdana,Arial,sans-serif;fontSize=16;" mermaidBaseValue="🧠 Cerveau ESP32-S3&#xa;• Acquisition à 50 Hz &amp; Faraday&#xa;➜ Pilote le LoRa en SPI" id="2k-QhVNp1L4ZpJLj8icC-39">
+          <mxCell parent="2k-QhVNp1L4ZpJLj8icC-36" style="html=1;whiteSpace=wrap;strokeWidth=1;fillColor=light-dark(#E1F5FE,#181818);strokeColor=default;fontColor=light-dark(#333333,#cccccc);fontFamily=Trebuchet MS,Verdana,Arial,sans-serif;fontSize=16;" vertex="1">
+            <mxGeometry height="93" width="181.06474820143885" x="129.4676258992806" y="158" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="LoRa SX1262 868 MHz" mermaidId="n:B3" mermaidBaseStyle="html=1;whiteSpace=wrap;strokeWidth=2;fillColor=#e8f5e9;strokeColor=#388e3c;fontColor=light-dark(#333333,#cccccc);fontFamily=Trebuchet MS,Verdana,Arial,sans-serif;fontSize=16;" mermaidBaseValue="📡 Émetteur LoRa 868 MHz&#xa;(Semtech SX1262)" id="2k-QhVNp1L4ZpJLj8icC-40">
+          <mxCell parent="2k-QhVNp1L4ZpJLj8icC-36" style="html=1;whiteSpace=wrap;strokeWidth=1;fillColor=light-dark(#E1F5FE,#181818);strokeColor=default;fontColor=light-dark(#333333,#cccccc);fontFamily=Trebuchet MS,Verdana,Arial,sans-serif;fontSize=16;" vertex="1">
+            <mxGeometry height="73" width="162.70503597122303" x="138.64748201438852" y="290" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="" mermaidId="e:B2-&gt;B3#0" mermaidBaseStyle="curved=1;startArrow=none;endArrow=none;strokeColor=light-dark(#333333,#cccccc);exitX=0.5;exitY=1;entryX=0.5;entryY=0;" mermaidBaseValue="" id="2k-QhVNp1L4ZpJLj8icC-41">
+          <mxCell edge="1" parent="2k-QhVNp1L4ZpJLj8icC-36" source="2k-QhVNp1L4ZpJLj8icC-39" style="curved=1;startArrow=none;endArrow=none;strokeColor=light-dark(#333333,#cccccc);exitX=0.5;exitY=1;entryX=0.5;entryY=0;rounded=0;" target="2k-QhVNp1L4ZpJLj8icC-40">
+            <mxGeometry relative="1" as="geometry">
+              <Array as="points" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="3. Poste de Stand&amp;nbsp;" mermaidId="n:COL3" mermaidBaseStyle="html=1;whiteSpace=wrap;strokeWidth=1;verticalAlign=top;fillColor=light-dark(#ffffde,#1f2020);strokeColor=light-dark(#aaaa33,#cccccc);fontColor=light-dark(#333333,#cccccc);fontFamily=Trebuchet MS,Verdana,Arial,sans-serif;fontSize=16;" mermaidBaseValue="3. Poste de Stand (Ingénierie)" id="2k-QhVNp1L4ZpJLj8icC-42">
+          <mxCell parent="2k-QhVNp1L4ZpJLj8icC-30" style="html=1;whiteSpace=wrap;strokeWidth=1;verticalAlign=top;fillColor=light-dark(#ffffde,#1f2020);strokeColor=light-dark(#aaaa33,#cccccc);fontColor=light-dark(#333333,#cccccc);fontFamily=Trebuchet MS,Verdana,Arial,sans-serif;fontSize=16;" vertex="1">
+            <mxGeometry height="409" width="353" x="850" y="411" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div&gt;Récepteur LoRa SX1262 USB&lt;/div&gt;" mermaidId="n:S1" mermaidBaseStyle="html=1;whiteSpace=wrap;strokeWidth=2;fillColor=#fff3e0;strokeColor=#f57c00;fontColor=light-dark(#333333,#cccccc);fontFamily=Trebuchet MS,Verdana,Arial,sans-serif;fontSize=16;" mermaidBaseValue="📡 Récepteur radio USB&#xa;➜ Transmet au WebSerial" id="2k-QhVNp1L4ZpJLj8icC-43">
+          <mxCell parent="2k-QhVNp1L4ZpJLj8icC-42" style="html=1;whiteSpace=wrap;strokeWidth=1;fillColor=light-dark(#E1F5FE,#181818);strokeColor=default;fontColor=light-dark(#333333,#cccccc);fontFamily=Trebuchet MS,Verdana,Arial,sans-serif;fontSize=16;" vertex="1">
+            <mxGeometry height="73" width="244" x="54" y="45" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="&lt;div&gt;Dashboard Web Chrome&lt;/div&gt;" mermaidId="n:S2" mermaidBaseStyle="html=1;whiteSpace=wrap;strokeWidth=2;fillColor=#fff3e0;strokeColor=#f57c00;fontColor=light-dark(#333333,#cccccc);fontFamily=Trebuchet MS,Verdana,Arial,sans-serif;fontSize=16;" mermaidBaseValue="💻 Dashboard Web Chrome&#xa;• Vitesse &amp; Puissance en direct&#xa;➜ Exporte vers le CSV" id="2k-QhVNp1L4ZpJLj8icC-44">
+          <mxCell parent="2k-QhVNp1L4ZpJLj8icC-42" style="html=1;whiteSpace=wrap;strokeWidth=1;fillColor=light-dark(#E1F5FE,#181818);strokeColor=default;fontColor=light-dark(#333333,#cccccc);fontFamily=Trebuchet MS,Verdana,Arial,sans-serif;fontSize=16;" vertex="1">
+            <mxGeometry height="81" width="256" x="48" y="170" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="Sauvegarde CSV directe" mermaidId="n:S3" mermaidBaseStyle="html=1;whiteSpace=wrap;strokeWidth=2;fillColor=#fff3e0;strokeColor=#f57c00;fontColor=light-dark(#333333,#cccccc);fontFamily=Trebuchet MS,Verdana,Arial,sans-serif;fontSize=16;" mermaidBaseValue="📁 Sauvegarde CSV directe&#xa;(Stratégie d&#39;après-course)" id="2k-QhVNp1L4ZpJLj8icC-45">
+          <mxCell parent="2k-QhVNp1L4ZpJLj8icC-42" style="html=1;whiteSpace=wrap;strokeWidth=1;fillColor=light-dark(#E1F5FE,#181818);strokeColor=default;fontColor=light-dark(#333333,#cccccc);fontFamily=Trebuchet MS,Verdana,Arial,sans-serif;fontSize=16;" vertex="1">
+            <mxGeometry height="73" width="256" x="48" y="311" as="geometry" />
+          </mxCell>
+        </UserObject>
+        <UserObject label="" mermaidId="e:S1-&gt;S2#0" mermaidBaseStyle="curved=1;startArrow=none;endArrow=none;strokeColor=light-dark(#333333,#cccccc);exitX=0.5;exitY=1;entryX=0.5;entryY=0;" mermaidBaseValue="" id="2k-QhVNp1L4ZpJLj8icC-46">
+          <mxCell edge="1" parent="2k-QhVNp1L4ZpJLj8icC-42" source="2k-QhVNp1L4ZpJLj8icC-43" style="curved=1;startArrow=none;endArrow=none;strokeColor=light-dark(#333333,#cccccc);exitX=0.5;exitY=1;entryX=0.5;entryY=0;rounded=0;" target="2k-QhVNp1L4ZpJLj8icC-44">
+            <mxGeometry relative="1" as="geometry">
+              <Array as="points" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <UserObject label="" mermaidId="e:S2-&gt;S3#0" mermaidBaseStyle="curved=1;startArrow=none;endArrow=none;strokeColor=light-dark(#333333,#cccccc);exitX=0.5;exitY=1;entryX=0.5;entryY=0;" mermaidBaseValue="" id="2k-QhVNp1L4ZpJLj8icC-47">
+          <mxCell edge="1" parent="2k-QhVNp1L4ZpJLj8icC-42" source="2k-QhVNp1L4ZpJLj8icC-44" style="curved=1;startArrow=none;endArrow=none;strokeColor=light-dark(#333333,#cccccc);exitX=0.5;exitY=1;entryX=0.5;entryY=0;rounded=0;" target="2k-QhVNp1L4ZpJLj8icC-45">
+            <mxGeometry relative="1" as="geometry">
+              <Array as="points" />
+            </mxGeometry>
+          </mxCell>
+        </UserObject>
+        <mxCell id="2k-QhVNp1L4ZpJLj8icC-48" edge="1" parent="2k-QhVNp1L4ZpJLj8icC-30" source="2k-QhVNp1L4ZpJLj8icC-35" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="2k-QhVNp1L4ZpJLj8icC-38">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="120.04999999999995" y="431.53" />
+              <mxPoint x="120.04999999999995" y="492.47" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="2k-QhVNp1L4ZpJLj8icC-49" connectable="0" parent="2k-QhVNp1L4ZpJLj8icC-48" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Alim 5V" vertex="1">
+          <mxGeometry relative="1" x="0.1647" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="2k-QhVNp1L4ZpJLj8icC-50" edge="1" parent="2k-QhVNp1L4ZpJLj8icC-30" source="2k-QhVNp1L4ZpJLj8icC-33" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.003;entryY=0.398;entryDx=0;entryDy=0;entryPerimeter=0;" target="2k-QhVNp1L4ZpJLj8icC-39">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="120.04999999999995" y="554.51" />
+              <mxPoint x="120.04999999999995" y="605.98" />
+            </Array>
+            <mxPoint x="320" y="591" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="2k-QhVNp1L4ZpJLj8icC-51" connectable="0" parent="2k-QhVNp1L4ZpJLj8icC-50" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Impulsion" vertex="1">
+          <mxGeometry relative="1" x="0.0851" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="2k-QhVNp1L4ZpJLj8icC-52" edge="1" parent="2k-QhVNp1L4ZpJLj8icC-30" source="2k-QhVNp1L4ZpJLj8icC-32" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=-0.002;entryY=0.8;entryDx=0;entryDy=0;entryPerimeter=0;" target="2k-QhVNp1L4ZpJLj8icC-39">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="140.04999999999995" y="800.51" />
+              <mxPoint x="140.04999999999995" y="643.39" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="2k-QhVNp1L4ZpJLj8icC-53" connectable="0" parent="2k-QhVNp1L4ZpJLj8icC-52" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Ligne I2C" vertex="1">
+          <mxGeometry relative="1" x="0.3378" y="-1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="2k-QhVNp1L4ZpJLj8icC-54" edge="1" parent="2k-QhVNp1L4ZpJLj8icC-30" source="2k-QhVNp1L4ZpJLj8icC-34" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=-0.003;entryY=0.599;entryDx=0;entryDy=0;entryPerimeter=0;" target="2k-QhVNp1L4ZpJLj8icC-39">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="120.04999999999995" y="677.49" />
+              <mxPoint x="120.04999999999995" y="624.71" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="2k-QhVNp1L4ZpJLj8icC-55" connectable="0" parent="2k-QhVNp1L4ZpJLj8icC-54" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Signal analogique" vertex="1">
+          <mxGeometry relative="1" x="0.0906" y="-1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="2k-QhVNp1L4ZpJLj8icC-56" edge="1" parent="2k-QhVNp1L4ZpJLj8icC-30" source="2k-QhVNp1L4ZpJLj8icC-35" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=1;exitDx=0;exitDy=0;entryX=0.006;entryY=0.198;entryDx=0;entryDy=0;entryPerimeter=0;" target="2k-QhVNp1L4ZpJLj8icC-39">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="100.05000000000001" y="468.02" />
+              <mxPoint x="100.05000000000001" y="518.46" />
+              <mxPoint x="140.04999999999995" y="518.46" />
+              <mxPoint x="140.04999999999995" y="587.39" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="2k-QhVNp1L4ZpJLj8icC-57" connectable="0" parent="2k-QhVNp1L4ZpJLj8icC-56" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Signal PWM" vertex="1">
+          <mxGeometry relative="1" x="0.2535" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="2k-QhVNp1L4ZpJLj8icC-58" edge="1" parent="2k-QhVNp1L4ZpJLj8icC-30" source="2k-QhVNp1L4ZpJLj8icC-40" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="2k-QhVNp1L4ZpJLj8icC-43">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="760.05" y="737.53" />
+              <mxPoint x="760.05" y="492.47" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="2k-QhVNp1L4ZpJLj8icC-59" connectable="0" parent="2k-QhVNp1L4ZpJLj8icC-58" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Liaison radio 868 Mhz" vertex="1">
+          <mxGeometry relative="1" x="0.1723" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

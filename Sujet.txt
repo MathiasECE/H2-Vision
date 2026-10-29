@@ -1,0 +1,73 @@
+H2-Vision
+Contexte
+La compétition H2GP (Hydrogen Grand Prix) est une compétition internationale de voitures radiocommandées propulsées à l'hydrogène, organisée à destination des équipes étudiantes. Elle constitue un terrain d'expérimentation unique à la croisée de deux enjeux technologiques majeurs du XXIe siècle : la mobilité hydrogène et la gestion optimisée de l'énergie embarquée. Dans la catégorie Stock, le règlement impose de conserver intacts les éléments principaux du kit officiel — châssis, moteur brushless, variateur (ESC), pile à combustible à hydrogène et système radio — afin de placer toutes les équipes sur un pied d'égalité matérielle. La différenciation se joue alors exclusivement sur la stratégie de course, la gestion de l'énergie et la compréhension fine du comportement dynamique du véhicule.
+
+C'est précisément ici qu'intervient la télémétrie : pour optimiser une stratégie de course sans pouvoir modifier le groupe motopropulseur, il est indispensable de mesurer, enregistrer et analyser le comportement réel de la voiture lors des essais. Quand la pile à combustible se retrouve-t-elle en sous-tension ? Quelle est la consommation d'hydrogène en fonction du profil de vitesse ? À quelle température travaillent les composants critiques ? Le pilote optimise-t-il réellement son style de conduite entre deux tours ? Sans instrumentation, ces questions restent sans réponse et l'équipe navigue à vue.
+
+Le développement d'un système de télémétrie embarqué pour la H2GP Stock est un projet d'ingénierie système complet et directement utile : il produit un outil concret dont l'équipe de compétition bénéficie immédiatement pour améliorer ses performances. Il couvre l'ensemble de la chaîne de mesure — du capteur physique jusqu'à la visualisation des données analysées — en imposant une contrainte supplémentaire particulièrement formatrice : le système doit être léger, compact, non intrusif et démontable pour ne pas pénaliser les performances de la voiture ni violer le règlement Stock.
+Informations complémentaires
+Description courte :
+Développement d’un protocole de télémétrie pour une voiture H2GP en catégorie Stock
+
+Objectif principal / Résumé :
+Le projet s’inscrit dans le cadre de la compétition H2GP, qui consiste à faire évoluer des voitures radiocommandées fonctionnant à l’hydrogène. Dans la catégorie Stock, les étudiants doivent travailler à partir du kit officiel, sans modifier les éléments principaux du véhicule tels que le châssis, le moteur, le variateur, la pile à combustible ou le système radio.
+
+L’objectif du projet est de développer un protocole de télémétrie permettant de collecter des données utiles pendant les phases d’essais et de roulage. Les étudiants devront identifier les informations pertinentes à mesurer, comme la tension, le courant, la vitesse, le temps de roulage, le temps au tour ou encore la température de certains composants.
+
+Le système devra être léger, démontable, non intrusif et ne pas interférer avec le fonctionnement de la voiture. Il pourra reposer sur un microcontrôleur de type Arduino, ESP32 ou équivalent, associé à différents capteurs et à un système d’enregistrement ou de transmission des données.
+
+Les grandes étapes du projet seront l’analyse du règlement et du kit officiel, le choix des données à mesurer, la sélection des capteurs, la réalisation d’un prototype, l’intégration sur la voiture, la mise en place d’un protocole d’essai, puis l’analyse des données collectées.
+
+Les résultats attendus sont un système de télémétrie fonctionnel, un protocole de test reproductible, des mesures exploitables sous forme de tableaux ou de graphiques, ainsi qu’un dossier technique présentant les choix réalisés, les essais effectués et les conclusions obtenues. Ce projet doit permettre aux étudiants de mieux comprendre le comportement énergétique et dynamique de la voiture afin d’aider l’équipe à améliorer sa stratégie de course dans le respect du règlement Stock.
+
+Cahier des charges succinct :
+Étape 1 — Analyse Réglementaire et Définition du Plan de Mesure
+
+Lecture exhaustive et analyse critique du règlement H2GP catégorie Stock : identification précise des éléments intouchables (châssis, moteur, ESC, pile à combustible, système radio) et des zones libres où l'ajout de capteurs est autorisé (mesures passives, non intrusives).
+Étude du kit officiel : caractérisation de la pile à combustible (tension nominale, courant maximal, sensibilité aux perturbations électriques), de l'ESC (protocole PWM de commande, protections intégrées) et du moteur (plage de fonctionnement).
+Définition collaborative du plan de mesure : identification et priorisation des grandeurs à mesurer selon leur pertinence pour la stratégie de course :
+Électriques : tension aux bornes de la pile à combustible (V), courant consommé (A), puissance instantanée (W), énergie cumulée consommée (Wh).
+Dynamiques : vitesse linéaire du véhicule (m/s), accélérations (ax, ay, az via IMU), temps au tour, temps de roulage cumulé.
+Thermiques : température des composants critiques (ESC, pile à combustible, moteur) via sondes NTC ou thermistances.
+Commande : signal PWM envoyé par le récepteur radio à l'ESC (position de la gâchette du pilote), pour corréler le comportement de conduite avec la consommation.
+Rédaction du cahier des charges du système de télémétrie : contraintes de masse maximale (objectif ≤ 30 g), encombrement, autonomie, fréquence d'acquisition par canal.
+Étape 2 — Conception et Réalisation du Système d'Acquisition
+
+Sélection du microcontrôleur central : ESP32 retenu pour son double avantage — faible consommation, Wi-Fi et Bluetooth intégrés permettant la transmission sans fil sans module RF additionnel. Comparaison documentée avec Arduino Nano (moins de RAM, pas de Wi-Fi) et STM32 (plus complexe, sur-dimensionné).
+Sélection et justification des capteurs :
+Mesure de courant : capteur à effet Hall ACS712 ou INA226 (mesure simultanée tension + courant via I²C, très précis, non intrusif — mesure par shunt en série sans dérivation du circuit de puissance).
+Mesure de vitesse : encodeur magnétique sur une roue (aimant + capteur Hall A3144) ou calcul par intégration de l'accélération IMU.
+Centrale inertielle : MPU-6050 ou ICM-42688 (accéléromètre 3 axes + gyroscope 3 axes, interface I²C, faible masse).
+Température : sondes NTC 10kΩ avec diviseur résistif, ou TC74 (I²C) pour une intégration simplifiée.
+Mesure du signal PWM radio : lecture par interruption GPIO du signal entre récepteur et ESC (totalement non intrusif — simple lecture de tension).
+Conception du schéma électronique complet (KiCad) et réalisation du prototype sur breadboard puis sur circuit imprimé (PCB sur mesure ou shield Arduino/ESP32).
+Conception du boîtier d'intégration : impression 3D d'un support compact fixé sur le châssis par velcro ou vis M2 dans des emplacements autorisés, sans perçage du châssis original.
+Étape 3 — Développement Logiciel Embarqué et Transmission
+
+Développement du firmware ESP32 (C++ / Arduino framework) :
+Acquisition synchronisée de tous les capteurs à fréquence configurable (objectif 10 Hz minimum pour les grandeurs électriques, 50 Hz pour l'IMU).
+Horodatage de chaque mesure (timestamp en millisecondes depuis le démarrage).
+Enregistrement local sur carte microSD (module SPI) en format CSV ou binaire compressé, avec création automatique d'un nouveau fichier à chaque session.
+Développement de la transmission sans fil temps réel (optionnelle selon la portée disponible sur piste) :
+Serveur Web embarqué sur l'ESP32 (bibliothèque AsyncWebServer) diffusant les données en WebSocket vers un PC ou smartphone connecté au réseau Wi-Fi de l'ESP32 en mode Access Point.
+Interface de visualisation temps réel dans un navigateur web : jauges de tension, courbe de courant, vitesse instantanée, température.
+Développement des outils de post-traitement (Python / Jupyter Notebook) :
+Importation et nettoyage des fichiers CSV issus de la carte SD.
+Calcul des métriques dérivées : puissance instantanée, énergie consommée par tour, carte vitesse/consommation.
+Génération automatique de graphiques d'analyse : tension vs. temps, courant vs. vitesse, corrélation signal pilote / consommation, courbe de température par session.
+Étape 4 — Intégration sur le Véhicule et Protocole d'Essais
+
+Intégration physique sur la voiture H2GP : fixation du boîtier, routage des fils de capteurs (gaines de protection, fixation par colliers), vérification de l'absence d'interférence électromagnétique avec le système radio (blindage si nécessaire, filtrage des alimentations).
+Validation du bilan de masse : pesée du système de télémétrie complet, vérification du respect de la contrainte de masse définie en étape 1.
+Définition du protocole d'essais reproductible :
+Procédure de démarrage et de vérification pré-essai (contrôle de la charge de la batterie du télémètre, vérification de l'enregistrement SD).
+Définition des scénarios de test standardisés : tour à vitesse constante, accélération maximale, roulage longue durée, comparaison de deux styles de pilotage.
+Fiche de relevé des conditions d'essai (température ambiante, pression des pneus, charge en hydrogène initiale) pour assurer la reproductibilité.
+Campagnes de mesure sur circuit d'entraînement : réalisation des essais selon le protocole, collecte des données et analyse systématique.
+Rédaction du rapport d'analyse : bilan énergétique complet, identification des phases de sous-performance, recommandations concrètes pour la stratégie de course (vitesse cible optimale, style de pilotage, gestion de la charge en hydrogène).
+
+Pré-requis :
+Arduino / ESP32 · Capteurs analogiques/numériques · Python · Énergie électrique
+
+Accessibilité / difficulté :
+Modéré

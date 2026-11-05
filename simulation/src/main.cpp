@@ -18,9 +18,19 @@
 // ============================================================================
 // CONFIGURATION DES BROCHES DE SIMULATION (ESP32 N°2)
 // ============================================================================
-#define PIN_CURRENT_OUT     18  // Sortie courant modulé -> vers IN+ de l'INA226
-#define PIN_THROTTLE_OUT    19  // Sortie PWM gâchette -> vers GPIO 5 de l'ESP32 N°1
-#define PIN_HALL_OUT        23  // Sortie impulsions Hall -> vers GPIO 4 de l'ESP32 N°1
+#if defined(CONFIG_IDF_TARGET_ESP32S3) || defined(ARDUINO_ESP32S3_DEV)
+  // Configuration pour ESP32-S3 (Evite GPIO 19/20 reserves pour l'USB natif)
+  #define PIN_CURRENT_OUT     18  // Sortie courant module -> vers IN+ de l'INA226
+  #define PIN_THROTTLE_OUT    7   // Sortie PWM gachette -> vers GPIO 5 de l'ESP32 N°1
+  #define PIN_HALL_OUT        21  // Sortie impulsions Hall -> vers GPIO 4 de l'ESP32 N°1
+  #define BOARD_NAME          "ESP32-S3"
+#else
+  // Configuration pour ESP32 classique (NodeMCU-32S / ESP32-WROOM-32)
+  #define PIN_CURRENT_OUT     18  // Sortie courant module -> vers IN+ de l'INA226
+  #define PIN_THROTTLE_OUT    19  // Sortie PWM gachette -> vers GPIO 5 de l'ESP32 N°1
+  #define PIN_HALL_OUT        23  // Sortie impulsions Hall -> vers GPIO 4 de l'ESP32 N°1
+  #define BOARD_NAME          "NodeMCU-32S"
+#endif
 
 // Canaux LEDC PWM
 #define CH_CURRENT          0   // Canal PWM pour le courant
@@ -49,7 +59,7 @@ void setup() {
     pinMode(PIN_HALL_OUT, OUTPUT);
     digitalWrite(PIN_HALL_OUT, HIGH); // Repos à l'état haut (comme le capteur Hall avec pull-up)
 
-    Serial.println("[OK] Simulateur pret :");
+    Serial.printf("[OK] Simulateur pret (%s) :\n", BOARD_NAME);
     Serial.printf("  - GPIO %d : Sortie Courant vers IN+ de l'INA226 (avec R = 150-220 Ohm)\n", PIN_CURRENT_OUT);
     Serial.printf("  - GPIO %d : Sortie Gachette PWM vers GPIO 5 de l'ESP32 #1\n", PIN_THROTTLE_OUT);
     Serial.printf("  - GPIO %d : Sortie Vitesse Hall vers GPIO 4 de l'ESP32 #1\n", PIN_HALL_OUT);

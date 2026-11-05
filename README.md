@@ -72,7 +72,7 @@ Conforme au schéma électronique KiCad 10 et au fichier de configuration [`H2VI
 | **Câble Y Servo (Gâchette)** | Impulsion PWM | **`GPIO 5`** | Signal blanc/jaune de la radiocommande |
 | **Capteur Électrique INA226** | Données I2C `SDA` | **`GPIO 8`** | Bus 400 kHz Fast Mode |
 | **Capteur Électrique INA226** | Horloge I2C `SCL` | **`GPIO 9`** | Bus 400 kHz Fast Mode |
-| **Thermistance CTN 10k** | Point milieu ADC | **`GPIO 1`** | Pont diviseur avec résistance 10k vers GND |
+| **Thermistance CTN 10k** | Point milieu ADC | **`GPIO 6`** | Pont diviseur avec résistance 10k vers GND |
 | **Transceiver LoRa SX1262** | SPI Chip Select `NSS`| **`GPIO 10`** | Module Waveshare Core1262-868M |
 | **Transceiver LoRa SX1262** | SPI `MOSI` | **`GPIO 11`** | Ligne données sortantes SPI |
 | **Transceiver LoRa SX1262** | SPI `SCK` | **`GPIO 12`** | Horloge SPI |

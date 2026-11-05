@@ -8,7 +8,7 @@
 // ============================================================================
 #if CONFIG_IDF_TARGET_ESP32S3
     // Brochage pour ESP32-S3 DevKitC-1 (conforme au schéma KiCad H2-Vision)
-    #define PIN_NTC_ADC         1   // ADC1_CH0 : Sonde température NTC 10k
+    #define PIN_NTC_ADC         6   // ADC1_CH5 : Sonde température NTC 10k (entre GPIO 4 et 18)
     #define PIN_HALL_ISR        4   // Interruption vitesse (Capteur Hall A3144)
     #define PIN_THROTTLE_PWM    5   // Capture impulsion PWM gâchette (Câble Y)
     #define PIN_I2C_SDA         8   // Bus I2C Données (INA226)

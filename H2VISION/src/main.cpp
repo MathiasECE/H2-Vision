@@ -168,6 +168,12 @@ struct SystemState {
 SystemState g_state;
 SemaphoreHandle_t g_stateMutex;
 
+// Variables d'état du simulateur dynamique de course (si capteurs non raccordés)
+static float sim_throttle_pct = 0.0f;
+static float sim_speed_kmh    = 0.0f;
+static float sim_dist_m       = 0.0f;
+static float sim_temp_stack_c = 24.5f;
+
 // ============================================================================
 // TÂCHE CORE 0 : ACQUISITION TEMPS RÉEL 50 HZ & CALCUL DE FARADAY
 // ============================================================================
@@ -183,24 +189,91 @@ void taskAcquisition50Hz(void *pvParameters) {
         float dt_s = (now_us - last_step_us) * 1e-6f;
         last_step_us = now_us;
 
-        // --- 1. Lecture Électrique (INA226) ---
+        // --- 1. Lecture Électrique (INA226) & Détection Mode Simulation ---
         float v_meas = 0.0f, i_meas = 0.0f;
         bool ina_ok = readINA226(v_meas, i_meas);
         if (!ina_ok) {
-            // Re-tentative de connexion I2C à chaud si débranché
             ina226_initialized = initINA226();
+        }
+
+        bool simu_active = FORCE_SIMULATION_MODE || (SIMULATION_ENABLED && !ina_ok);
+
+        // --- 2. Lecture ou Simulation de la Gâchette Pilote (PWM) ---
+        noInterrupts();
+        uint32_t pwm_us = pwm_pulse_width_us;
+        uint32_t pwm_age = now_us - pwm_last_update_us;
+        interrupts();
+
+        uint8_t throttle = 0;
+        bool real_pwm_detected = (pwm_age < 200000UL);
+
+        if (real_pwm_detected && !FORCE_SIMULATION_MODE) {
+            // Signal réel de la radiocommande RC (câble Y)
+            if (pwm_us <= PWM_NEUTRAL_PULSE_US) {
+                throttle = 0;
+            } else {
+                long pct = map((long)pwm_us, PWM_NEUTRAL_PULSE_US, PWM_MAX_PULSE_US, 0, 100);
+                throttle = (uint8_t)constrain(pct, 0, 100);
+            }
+        } else if (simu_active) {
+            // Profil dynamique de course (cycle de 16 s simulant un tour de circuit)
+            float t_s = now_us * 1e-6f;
+            float lap_phase = fmodf(t_s, 16.0f);
+            float target_pct = 0.0f;
+
+            if (lap_phase < 4.0f) {
+                // Relance progressive en sortie d'épingle (20% -> 85%)
+                target_pct = 20.0f + (lap_phase / 4.0f) * 65.0f;
+            } else if (lap_phase < 8.0f) {
+                // Ligne droite des stands : plein gaz (100% avec micro-jitter)
+                target_pct = 96.0f + 4.0f * sinf(t_s * 6.0f);
+            } else if (lap_phase < 10.0f) {
+                // Zone de gros freinage avant virage serré (0%)
+                target_pct = 0.0f;
+            } else if (lap_phase < 13.5f) {
+                // Portion technique sinueuse à mi-régime (45% - 65%)
+                target_pct = 45.0f + 15.0f * sinf(t_s * 2.5f);
+            } else {
+                // Virage rapide d'entrée sur ligne droite (75%)
+                target_pct = 75.0f;
+            }
+
+            // Filtrage d'inertie de la commande des gaz
+            sim_throttle_pct += (target_pct - sim_throttle_pct) * 0.12f;
+            throttle = (uint8_t)constrain(sim_throttle_pct, 0.0f, 100.0f);
+
+            // Génération physique réelle du signal PWM sur GPIO 7 (bouclable sur GPIO 5)
+            #if defined(PIN_PWM_SIM_OUT)
+                uint32_t sim_pulse_us = PWM_MIN_PULSE_US + (uint32_t)(throttle * 10.0f);
+                uint32_t duty = (sim_pulse_us * 65535UL) / 20000UL;
+                ledcWrite(0, duty);
+            #endif
+        }
+
+        // --- 3. Modélisation de la Pile PEM Horizon (si simulation active) ---
+        if (simu_active) {
+            float g_norm = (float)throttle / 100.0f;
+            float noise = 0.05f * sinf(now_us * 1e-5f);
+
+            // Modèle de courant moteur (repos 0.25 A, pic à 9.5 A à plein gaz)
+            i_meas = 0.25f + 9.20f * (g_norm * g_norm) + noise;
+            if (i_meas < 0.0f) i_meas = 0.0f;
+
+            // Courbe de polarisation de la pile (effondrement de tension : 8.4V repos -> 7.1V pleine charge)
+            v_meas = 8.40f - (0.11f * i_meas) - 0.15f * log10f(i_meas + 1.0f) - noise * 0.5f;
+            if (v_meas < 0.0f) v_meas = 0.0f;
         }
 
         float p_meas = v_meas * i_meas;
         float d_energy_wh = (p_meas * dt_s) / 3600.0f;
 
-        // --- 2. Intégration Loi de Faraday (Jauge Hydrogène) ---
+        // --- 4. Intégration de la Loi de Faraday (Masse H2 consommée) ---
         // Débit molaire H2 (mol/s) = I / (2 * F * rendement)
         float i_positive = (i_meas > 0.0f) ? i_meas : 0.0f;
         float dn_h2_mol  = (i_positive * dt_s) / (2.0f * FARADAY_CONSTANT * FARADAY_EFFICIENCY);
         float dm_h2_g    = dn_h2_mol * H2_MOLAR_MASS;
 
-        // --- 3. Lecture Cinématique (Capteur Hall A3144) ---
+        // --- 5. Lecture Cinématique (Capteur Hall A3144 ou Modèle) ---
         noInterrupts();
         uint32_t period_copy = hall_period_us;
         uint32_t last_pulse  = hall_last_pulse_us;
@@ -208,35 +281,39 @@ void taskAcquisition50Hz(void *pvParameters) {
         interrupts();
 
         float rpm = 0.0f;
-        float speed_ms = 0.0f;
-        if ((now_us - last_pulse) < HALL_TIMEOUT_US && period_copy > 0) {
+        float speed_kmh = 0.0f;
+        float total_dist_m = 0.0f;
+
+        bool real_hall_detected = ((now_us - last_pulse) < HALL_TIMEOUT_US && period_copy > 0);
+
+        if (real_hall_detected && !FORCE_SIMULATION_MODE) {
             rpm = 60000000.0f / ((float)period_copy * MAGNETS_PER_REV);
             float wheel_rps = (rpm / 60.0f) / TRANSMISSION_RATIO;
-            speed_ms = wheel_rps * PI * WHEEL_DIAMETER_M;
+            float speed_ms = wheel_rps * PI * WHEEL_DIAMETER_M;
+            speed_kmh = speed_ms * 3.6f;
+            float wheel_circumference = PI * WHEEL_DIAMETER_M;
+            total_dist_m = ((float)pulses_copy / (MAGNETS_PER_REV * TRANSMISSION_RATIO)) * wheel_circumference;
+        } else if (simu_active) {
+            // Vitesse dynamique proportionnelle à la consigne de gaz
+            float target_spd = ((float)throttle / 100.0f) * 33.0f; // Vmax ~33 km/h
+            sim_speed_kmh += (target_spd - sim_speed_kmh) * (dt_s / 1.4f);
+            speed_kmh = sim_speed_kmh;
+            sim_dist_m += (speed_kmh / 3.6f) * dt_s;
+            total_dist_m = sim_dist_m;
+            float wheel_rps = (speed_kmh / 3.6f) / (PI * WHEEL_DIAMETER_M);
+            rpm = wheel_rps * 60.0f * TRANSMISSION_RATIO;
         }
-        float wheel_circumference = PI * WHEEL_DIAMETER_M;
-        float total_dist_m = ((float)pulses_copy / (MAGNETS_PER_REV * TRANSMISSION_RATIO)) * wheel_circumference;
 
-        // --- 4. Lecture Température Pile (NTC 10k) ---
+        // --- 6. Lecture Température Pile (NTC 10k ou Modèle Thermique) ---
         float temp_c = readNtcTemperatureC();
-
-        // --- 5. Lecture Gâchette Pilote (PWM Cordon Y) ---
-        noInterrupts();
-        uint32_t pwm_us = pwm_pulse_width_us;
-        uint32_t pwm_age = now_us - pwm_last_update_us;
-        interrupts();
-
-        uint8_t throttle = 0;
-        if (pwm_age < 200000UL) { // Signal PWM actif (< 200 ms)
-            if (pwm_us <= PWM_NEUTRAL_PULSE_US) {
-                throttle = 0; // Frein ou point mort
-            } else {
-                long pct = map((long)pwm_us, PWM_NEUTRAL_PULSE_US, PWM_MAX_PULSE_US, 0, 100);
-                throttle = (uint8_t)constrain(pct, 0, 100);
-            }
+        if (simu_active && (temp_c == 25.0f || FORCE_SIMULATION_MODE)) {
+            // Modèle d'échauffement thermique de la membrane sous charge
+            float target_temp = 24.0f + i_meas * 2.8f;
+            sim_temp_stack_c += (target_temp - sim_temp_stack_c) * (dt_s / 12.0f);
+            temp_c = sim_temp_stack_c;
         }
 
-        // --- 6. Mise à jour de l'état partagé avec protection Mutex ---
+        // --- 7. Mise à jour de l'état partagé avec protection Mutex ---
         if (xSemaphoreTake(g_stateMutex, pdMS_TO_TICKS(5)) == pdTRUE) {
             g_state.voltage_v      = v_meas;
             g_state.current_a      = i_meas;
@@ -248,7 +325,7 @@ void taskAcquisition50Hz(void *pvParameters) {
             g_state.h2_remaining_pct = constrain((rem_g / HYDROSTIK_CAPACITY_G) * 100.0f, 0.0f, 100.0f);
 
             g_state.rpm_shaft      = rpm;
-            g_state.speed_kmh      = speed_ms * 3.6f;
+            g_state.speed_kmh      = speed_kmh;
             g_state.distance_m     = total_dist_m;
             g_state.temp_stack_c   = temp_c;
             g_state.throttle_pct   = throttle;
@@ -259,7 +336,7 @@ void taskAcquisition50Hz(void *pvParameters) {
             if (temp_c >= ALERT_TEMP_CRIT_C)             alerts |= ALERT_BIT_TEMP_CRIT;
             if (ina_ok && v_meas <= ALERT_VOLTAGE_LOW_V) alerts |= ALERT_BIT_UNDERVOLT;
             if (g_state.h2_remaining_pct <= 15.0f)       alerts |= ALERT_BIT_H2_LOW;
-            if (!ina_ok)                                 alerts |= ALERT_BIT_INA_ERR;
+            if (!ina_ok && !simu_active)                 alerts |= ALERT_BIT_INA_ERR;
             g_state.alerts_mask = alerts;
 
             xSemaphoreGive(g_stateMutex);
@@ -344,6 +421,13 @@ void setup() {
 
     pinMode(PIN_THROTTLE_PWM, INPUT);
     attachInterrupt(digitalPinToInterrupt(PIN_THROTTLE_PWM), onThrottlePwmISR, CHANGE);
+
+    #if defined(PIN_PWM_SIM_OUT)
+    // Configuration du générateur PWM pilote matériel pour boucle de test (GPIO 7 -> GPIO 5)
+    ledcSetup(0, 50, 16);
+    ledcAttachPin(PIN_PWM_SIM_OUT, 0);
+    Serial.printf("[SIMU] Generateur PWM pilote configure sur GPIO %d (50 Hz, 1000-2000 us)\n", PIN_PWM_SIM_OUT);
+    #endif
 
     // 3. Initialisation Bus I2C (400 kHz Fast Mode) & Capteur INA226
     Wire.begin(PIN_I2C_SDA, PIN_I2C_SCL, 400000UL);

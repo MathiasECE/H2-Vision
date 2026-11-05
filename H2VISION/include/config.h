@@ -70,6 +70,11 @@
 #define PWM_NEUTRAL_PULSE_US    1500UL      // Impulsion point mort (1500 µs)
 #define PWM_MAX_PULSE_US        2000UL      // Impulsion plein gaz (2000 µs)
 
+// --- Simulateur Embarqué de Pile à Hydrogène & Gâchette Pilote ---
+#define SIMULATION_ENABLED              1   // 1 = Simulation active si capteurs absents, 0 = Matériel réel strict
+#define FORCE_SIMULATION_MODE           0   // 1 = Force la simulation même si des capteurs sont branchés
+#define PIN_PWM_SIM_OUT                 7   // Sortie PWM 50Hz réelle générée par l'ESP32-S3 (bouclable sur GPIO 5)
+
 // --- Paramètres Wi-Fi Point d'Accès (Dashboard Web Embarqué) ---
 #define WIFI_AP_SSID            "H2-VISION"
 #define WIFI_AP_PASS            "h2gp2026"

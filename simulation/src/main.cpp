@@ -19,10 +19,10 @@
 // CONFIGURATION DES BROCHES DE SIMULATION (ESP32 N°2)
 // ============================================================================
 #if defined(CONFIG_IDF_TARGET_ESP32S3) || defined(ARDUINO_ESP32S3_DEV)
-  // Configuration pour ESP32-S3 (Evite GPIO 19/20 reserves pour l'USB natif)
+  // Configuration pour ESP32-S3 (Toutes les broches entre 4 et 18 du meme cote)
   #define PIN_CURRENT_OUT     18  // Sortie courant module -> vers IN+ de l'INA226
   #define PIN_THROTTLE_OUT    7   // Sortie PWM gachette -> vers GPIO 5 de l'ESP32 N°1
-  #define PIN_HALL_OUT        21  // Sortie impulsions Hall -> vers GPIO 4 de l'ESP32 N°1
+  #define PIN_HALL_OUT        16  // Sortie impulsions Hall -> vers GPIO 4 de l'ESP32 N°1 (deplace depuis GPIO 21)
   #define BOARD_NAME          "ESP32-S3"
 #else
   // Configuration pour ESP32 classique (NodeMCU-32S / ESP32-WROOM-32)
@@ -51,8 +51,8 @@ void setup() {
     ledcSetup(CH_CURRENT, 5000, 8);
     ledcAttachPin(PIN_CURRENT_OUT, CH_CURRENT);
 
-    // 2. Configuration du Générateur de Gâchette RC (50 Hz, 16 bits : 20 ms)
-    ledcSetup(CH_THROTTLE, 50, 16);
+    // 2. Configuration du Générateur de Gâchette RC (50 Hz, 14 bits : 20 ms)
+    ledcSetup(CH_THROTTLE, 50, 14);
     ledcAttachPin(PIN_THROTTLE_OUT, CH_THROTTLE);
 
     // 3. Configuration de la sortie impulsion vitesse (Tout-ou-rien)
@@ -70,8 +70,8 @@ void setup() {
 void setRcThrottlePercent(float pct) {
     pct = constrain(pct, 0.0f, 100.0f);
     uint32_t pulse_us = 1000 + (uint32_t)(pct * 10.0f); // 1000 µs (0%) à 2000 µs (100%)
-    // Résolution 16 bits sur période 20 000 µs (50 Hz) : duty = (pulse_us * 65535) / 20000
-    uint32_t duty = (pulse_us * 65535UL) / 20000UL;
+    // Résolution 14 bits sur période 20 000 µs (50 Hz) : duty = (pulse_us * 16383) / 20000
+    uint32_t duty = (pulse_us * 16383UL) / 20000UL;
     ledcWrite(CH_THROTTLE, duty);
 }
 

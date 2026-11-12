@@ -75,6 +75,12 @@
 #define FORCE_SIMULATION_MODE           0   // 1 = Force la simulation même si des capteurs sont branchés
 #define PIN_PWM_SIM_OUT                 7   // Sortie PWM 50Hz réelle générée par l'ESP32-S3 (bouclable sur GPIO 5)
 
+// --- Calibrage Banc d'Essai HIL (ESP32 #2 -> INA226) & Multiplicateurs Pile PEM ---
+#define BENCH_HIL_SCALING               1   // 1 = Active le calibrage banc d'essai, 0 = Mesures directes en vraie course
+#define BENCH_SCALE_MODE_REALISTIC_FC   1   // 1 = Modèle pile PEM Horizon H-30 (8.4V-7.2V, 0.25A-4.1A, 30W), 0 = Multiplicateur pur
+#define BENCH_VOLTAGE_SCALE             2.80f // Multiplicateur direct tension (3.0V banc -> 8.4V pile)
+#define BENCH_CURRENT_SCALE             300.0f // Multiplicateur direct courant shunt (13.6 mA avec R220 -> 4.08 A)
+
 // --- Paramètres Wi-Fi Point d'Accès (Dashboard Web Embarqué) ---
 #define WIFI_AP_SSID            "H2-VISION"
 #define WIFI_AP_PASS            "h2gp2026"

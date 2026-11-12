@@ -179,7 +179,7 @@ function step(){
   if(rec){rec.s.push({t:rec.s.length*dt,spd:d.spd,P:d.P,T:d.T,I:d.I,g:d.g});rec.e+=d.P*dt/3600;rec.q+=d.I*dt;rec.d+=d.spd/3.6*dt;
     $("rectime").textContent=(rec.s.length*dt).toFixed(1)+" s"}
   $("spd").textContent=d.spd.toFixed(1);$("rpm").textContent=Math.round(d.rpm);$("dist").textContent=Math.round(S.dist);$("distkm").textContent=(S.dist/1000).toFixed(3);$("ldist").textContent=rec?Math.round(rec.d):0;$("ldsub").textContent=rec?"Enregistrement en cours":"Aucun tour en cours d’enregistrement";$("vavg").textContent=(S.dist/Math.max(t,.2)*3.6).toFixed(1);$("spdbar").style.width=Math.min(100,d.spd/20*100)+"%";
-  $("v").textContent=d.V.toFixed(2);$("i").textContent=d.I.toFixed(2);$("p").textContent=Math.round(d.P);$("t").textContent=d.T.toFixed(1);
+  $("v").textContent=d.V.toFixed(2);$("i").textContent=(d.I<1&&d.I>0)?d.I.toFixed(3):d.I.toFixed(2);$("p").textContent=(d.P<10&&d.P>0)?d.P.toFixed(2):Math.round(d.P);$("t").textContent=d.T.toFixed(1);
   $("g").textContent=Math.round(d.g);$("gbar").style.width=d.g+"%";$("wh").textContent=S.e.toFixed(2);$("h2ml").textContent=Math.round(S.h2);
   $("h2bar").style.width=Math.min(100,S.h2/CAP_ML*100)+"%";$("h2left").textContent=Math.max(0,100-S.h2/CAP_ML*100).toFixed(1);
   $("clock").textContent=fmt(t);

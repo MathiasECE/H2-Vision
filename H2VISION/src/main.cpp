@@ -32,6 +32,7 @@ SPIClass loraSPI(HSPI);
 SX1262Driver radio(loraSPI, PIN_LORA_NSS, PIN_LORA_DIO1, PIN_LORA_RST, PIN_LORA_BUSY);
 bool lora_initialized = false;
 bool ina226_initialized = false;
+volatile int16_t g_raw_shunt = 0;
 
 // ============================================================================
 // VARIABLES D'INTERRUPTION MATÉRIELLE (PLACÉES EN RAM RAPIDE IRAM)
@@ -103,6 +104,7 @@ bool readINA226(float &voltage_v, float &current_a) {
     if (Wire.endTransmission(false) != 0) return false;
     if (Wire.requestFrom((uint8_t)INA226_I2C_ADDR, (uint8_t)2) != 2) return false;
     int16_t raw_shunt = (Wire.read() << 8) | Wire.read();
+    g_raw_shunt = raw_shunt;
 
     // 2. Lecture Tension Bus (Registre 0x02, LSB = 1.25 mV)
     Wire.beginTransmission(INA226_I2C_ADDR);
@@ -198,6 +200,40 @@ void taskAcquisition50Hz(void *pvParameters) {
 
         bool simu_active = FORCE_SIMULATION_MODE || (SIMULATION_ENABLED && !ina_ok);
 
+        #if BENCH_HIL_SCALING
+        if (ina_ok && !FORCE_SIMULATION_MODE) {
+            // Mise à l'échelle intelligente pour banc d'essai HIL :
+            // Détection du courant physique traversant le shunt (au-delà de l'offset résiduel ~38 counts / 4.8 mA)
+            float i_net = i_meas - 0.0048f;
+            if (i_net < 0.0f) i_net = 0.0f;
+
+            #if BENCH_SCALE_MODE_REALISTIC_FC
+                // --- MODE 1 : Modèle Pile PEM Horizon H-30 Réaliste (8.4V-7.25V, 0.25A-4.10A, ~30W) ---
+                if (i_net > 0.002f) {
+                    // Courant physique shunt amplifié (ex: résistance 220R branchée entre IN- et GND)
+                    i_meas = 0.25f + (i_net * BENCH_CURRENT_SCALE);
+                } else {
+                    // Courant dérivé dynamiquement de la tension PWM réelle mesurée sur GPIO 18 (0.0V à 3.0V)
+                    float duty_ratio = constrain(v_meas / 3.0f, 0.0f, 1.0f);
+                    i_meas = 0.25f + (duty_ratio * 3.85f); // 0.25 A veille -> 4.10 A plein gaz
+                }
+
+                // Tension pile avec courbe de polarisation réelle (8.40V repos -> 7.25V pleine charge)
+                float load_ratio = constrain((i_meas - 0.25f) / 3.85f, 0.0f, 1.0f);
+                v_meas = 8.40f - (load_ratio * 1.15f); // 8.40V -> 7.25V
+            #else
+                // --- MODE 2 : Multiplicateur Linéaire Direct (V * 2.80, I * 300) ---
+                float duty_ratio = constrain(v_meas / 3.0f, 0.0f, 1.0f);
+                v_meas = v_meas * BENCH_VOLTAGE_SCALE;
+                if (i_net > 0.002f) {
+                    i_meas = i_net * BENCH_CURRENT_SCALE;
+                } else {
+                    i_meas = duty_ratio * 4.0f;
+                }
+            #endif
+        }
+        #endif
+
         // --- 2. Lecture ou Simulation de la Gâchette Pilote (PWM) ---
         noInterrupts();
         uint32_t pwm_us = pwm_pulse_width_us;
@@ -245,7 +281,7 @@ void taskAcquisition50Hz(void *pvParameters) {
             // Génération physique réelle du signal PWM sur GPIO 7 (bouclable sur GPIO 5)
             #if defined(PIN_PWM_SIM_OUT)
                 uint32_t sim_pulse_us = PWM_MIN_PULSE_US + (uint32_t)(throttle * 10.0f);
-                uint32_t duty = (sim_pulse_us * 65535UL) / 20000UL;
+                uint32_t duty = (sim_pulse_us * 16383UL) / 20000UL;
                 ledcWrite(0, duty);
             #endif
         }
@@ -381,8 +417,8 @@ void taskTelemetry10Hz(void *pvParameters) {
         }
 
         // 4. Sortie Série CSV temps réel (compatible Dashboard WebSerial & Debug)
-        // Format: CSV;timestamp_ms;U(V);I(A);P(W);E(Wh);Vitesse(km/h);RPM;Temp(C);Gaz(%);H2(%);Alertes;CRC16
-        Serial.printf("CSV;%lu;%.2f;%.2f;%.2f;%.3f;%.1f;%.0f;%.1f;%u;%u;0x%02X;0x%04X\n",
+        // Format: CSV;timestamp_ms;U(V);I(A);P(W);E(Wh);Vitesse(km/h);RPM;Temp(C);Gaz(%);H2(%);Alertes;CRC16 [ShuntRaw]
+        Serial.printf("CSV;%lu;%.2f;%.3f;%.2f;%.3f;%.1f;%.0f;%.1f;%u;%u;0x%02X;0x%04X [ShuntRaw=%d]\n",
                       (unsigned long)txPacket.timestamp_ms,
                       snap.voltage_v,
                       snap.current_a,
@@ -394,7 +430,8 @@ void taskTelemetry10Hz(void *pvParameters) {
                       txPacket.throttle_pct,
                       txPacket.h2_remaining,
                       txPacket.alerts_mask,
-                      txPacket.crc16);
+                      txPacket.crc16,
+                      g_raw_shunt);
     }
 }
 
@@ -424,7 +461,7 @@ void setup() {
 
     #if defined(PIN_PWM_SIM_OUT)
     // Configuration du générateur PWM pilote matériel pour boucle de test (GPIO 7 -> GPIO 5)
-    ledcSetup(0, 50, 16);
+    ledcSetup(0, 50, 14);
     ledcAttachPin(PIN_PWM_SIM_OUT, 0);
     Serial.printf("[SIMU] Generateur PWM pilote configure sur GPIO %d (50 Hz, 1000-2000 us)\n", PIN_PWM_SIM_OUT);
     #endif
@@ -468,7 +505,7 @@ void setup() {
 
         char json[256];
         snprintf(json, sizeof(json),
-                 "{\"spd\":%.1f,\"rpm\":%.0f,\"V\":%.2f,\"I\":%.2f,\"P\":%.1f,\"T\":%.1f,\"g\":%u,\"wh\":%.2f,\"h2\":%.1f,\"dist\":%.1f,\"rssi\":-45,\"lost\":0}",
+                 "{\"spd\":%.1f,\"rpm\":%.0f,\"V\":%.2f,\"I\":%.3f,\"P\":%.2f,\"T\":%.1f,\"g\":%u,\"wh\":%.2f,\"h2\":%.1f,\"dist\":%.1f,\"rssi\":-45,\"lost\":0}",
                  snap.speed_kmh,
                  snap.rpm_shaft,
                  snap.voltage_v,

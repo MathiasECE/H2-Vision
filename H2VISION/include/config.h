@@ -75,10 +75,10 @@
 #define FORCE_SIMULATION_MODE           0   // 1 = Force la simulation même si des capteurs sont branchés
 #define PIN_PWM_SIM_OUT                 7   // Sortie PWM 50Hz réelle générée par l'ESP32-S3 (bouclable sur GPIO 5)
 
-// --- Calibrage Banc d'Essai HIL (Multiplicateurs Linéaires Directs) ---
+// --- Calibrage Banc d'Essai HIL (Multiplicateurs Linéaires Directs INA226 sur GPIO 18) ---
 #define BENCH_HIL_SCALING               1       // 1 = Multiplicateurs banc d'essai actifs, 0 = Mesures directes en vraie course
-#define BENCH_VOLTAGE_SCALE             2.80f   // Multiplicateur direct tension (ex: 3.0V banc -> 8.40V, 0.0V -> 0.0V sans tension a vide forcee)
-#define BENCH_CURRENT_SCALE             750.0f  // Multiplicateur direct courant (ex: 0.005A mesure -> 3.75A pile)
+#define BENCH_VOLTAGE_SCALE             3.70f   // Multiplicateur direct tension (2.20V max banc -> 8.14V pile, 0.0V -> 0.0V)
+#define BENCH_CURRENT_SCALE             2100.0f // Multiplicateur direct courant (0.0019A max shunt -> 3.99A pile, 0.0A -> 0.0A)
 
 // --- Paramètres Wi-Fi Point d'Accès (Dashboard Web Embarqué) ---
 #define WIFI_AP_SSID            "H2-VISION"

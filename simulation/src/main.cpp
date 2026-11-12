@@ -32,9 +32,9 @@
   #define BOARD_NAME          "NodeMCU-32S"
 #endif
 
-// Canaux LEDC PWM
-#define CH_CURRENT          0   // Canal PWM pour le courant
-#define CH_THROTTLE         1   // Canal PWM pour la gâchette RC (50 Hz)
+// Canaux LEDC PWM (Separation stricte des Timers matériels)
+#define CH_CURRENT          0   // Canal 0 (utilise Timer 0 matériel : 5000 Hz, 8 bits)
+#define CH_THROTTLE         2   // Canal 2 (utilise Timer 1 matériel : 50 Hz, 14 bits)
 
 // ============================================================================
 // INITIALISATION

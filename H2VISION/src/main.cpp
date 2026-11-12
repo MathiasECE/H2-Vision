@@ -33,6 +33,8 @@ SX1262Driver radio(loraSPI, PIN_LORA_NSS, PIN_LORA_DIO1, PIN_LORA_RST, PIN_LORA_
 bool lora_initialized = false;
 bool ina226_initialized = false;
 volatile int16_t g_raw_shunt = 0;
+volatile float g_raw_v_bus = 0.0f;
+volatile float g_raw_i_shunt = 0.0f;
 
 // ============================================================================
 // VARIABLES D'INTERRUPTION MATÉRIELLE (PLACÉES EN RAM RAPIDE IRAM)
@@ -116,6 +118,9 @@ bool readINA226(float &voltage_v, float &current_a) {
     float v_shunt_uv = (float)raw_shunt * 2.5f; // en microvolts
     voltage_v        = (float)raw_bus * 0.00125f; // en Volts
     current_a        = (v_shunt_uv * 1e-6f) / INA226_R_SHUNT_OHM; // Loi d'Ohm : I = U / R
+
+    g_raw_v_bus      = voltage_v;
+    g_raw_i_shunt    = current_a;
 
     return true;
 }
@@ -202,35 +207,12 @@ void taskAcquisition50Hz(void *pvParameters) {
 
         #if BENCH_HIL_SCALING
         if (ina_ok && !FORCE_SIMULATION_MODE) {
-            // Mise à l'échelle intelligente pour banc d'essai HIL :
-            // Détection du courant physique traversant le shunt (au-delà de l'offset résiduel ~38 counts / 4.8 mA)
-            float i_net = i_meas - 0.0048f;
-            if (i_net < 0.0f) i_net = 0.0f;
+            // Multiplicateurs directs sur les mesures physiques réelles de l'INA226 :
+            // 1. Tension : multiplicateur direct pur (si entrée = 0V, alors tension = 0.0V, pas de tension à vide imposée)
+            v_meas = v_meas * BENCH_VOLTAGE_SCALE;
 
-            #if BENCH_SCALE_MODE_REALISTIC_FC
-                // --- MODE 1 : Modèle Pile PEM Horizon H-30 Réaliste (8.4V-7.25V, 0.25A-4.10A, ~30W) ---
-                if (i_net > 0.002f) {
-                    // Courant physique shunt amplifié (ex: résistance 220R branchée entre IN- et GND)
-                    i_meas = 0.25f + (i_net * BENCH_CURRENT_SCALE);
-                } else {
-                    // Courant dérivé dynamiquement de la tension PWM réelle mesurée sur GPIO 18 (0.0V à 3.0V)
-                    float duty_ratio = constrain(v_meas / 3.0f, 0.0f, 1.0f);
-                    i_meas = 0.25f + (duty_ratio * 3.85f); // 0.25 A veille -> 4.10 A plein gaz
-                }
-
-                // Tension pile avec courbe de polarisation réelle (8.40V repos -> 7.25V pleine charge)
-                float load_ratio = constrain((i_meas - 0.25f) / 3.85f, 0.0f, 1.0f);
-                v_meas = 8.40f - (load_ratio * 1.15f); // 8.40V -> 7.25V
-            #else
-                // --- MODE 2 : Multiplicateur Linéaire Direct (V * 2.80, I * 300) ---
-                float duty_ratio = constrain(v_meas / 3.0f, 0.0f, 1.0f);
-                v_meas = v_meas * BENCH_VOLTAGE_SCALE;
-                if (i_net > 0.002f) {
-                    i_meas = i_net * BENCH_CURRENT_SCALE;
-                } else {
-                    i_meas = duty_ratio * 4.0f;
-                }
-            #endif
+            // 2. Courant : multiplicateur direct sur le courant mesuré (constant si branché sur rail fixe 3.3V)
+            i_meas = i_meas * BENCH_CURRENT_SCALE;
         }
         #endif
 
@@ -370,7 +352,9 @@ void taskAcquisition50Hz(void *pvParameters) {
             uint16_t alerts = 0;
             if (temp_c >= ALERT_TEMP_WARN_C)             alerts |= ALERT_BIT_TEMP_WARN;
             if (temp_c >= ALERT_TEMP_CRIT_C)             alerts |= ALERT_BIT_TEMP_CRIT;
+            #if !BENCH_HIL_SCALING
             if (ina_ok && v_meas <= ALERT_VOLTAGE_LOW_V) alerts |= ALERT_BIT_UNDERVOLT;
+            #endif
             if (g_state.h2_remaining_pct <= 15.0f)       alerts |= ALERT_BIT_H2_LOW;
             if (!ina_ok && !simu_active)                 alerts |= ALERT_BIT_INA_ERR;
             g_state.alerts_mask = alerts;
@@ -417,8 +401,8 @@ void taskTelemetry10Hz(void *pvParameters) {
         }
 
         // 4. Sortie Série CSV temps réel (compatible Dashboard WebSerial & Debug)
-        // Format: CSV;timestamp_ms;U(V);I(A);P(W);E(Wh);Vitesse(km/h);RPM;Temp(C);Gaz(%);H2(%);Alertes;CRC16 [ShuntRaw]
-        Serial.printf("CSV;%lu;%.2f;%.3f;%.2f;%.3f;%.1f;%.0f;%.1f;%u;%u;0x%02X;0x%04X [ShuntRaw=%d]\n",
+        // Format: CSV;timestamp_ms;U(V);I(A);P(W);E(Wh);Vitesse(km/h);RPM;Temp(C);Gaz(%);H2(%);Alertes;CRC16 [Raw: V=%.2fV, I=%.3fA, ShuntRaw=%d]
+        Serial.printf("CSV;%lu;%.2f;%.3f;%.2f;%.3f;%.1f;%.0f;%.1f;%u;%u;0x%02X;0x%04X [Raw: V=%.2fV, I=%.3fA, ShuntRaw=%d]\n",
                       (unsigned long)txPacket.timestamp_ms,
                       snap.voltage_v,
                       snap.current_a,
@@ -431,6 +415,8 @@ void taskTelemetry10Hz(void *pvParameters) {
                       txPacket.h2_remaining,
                       txPacket.alerts_mask,
                       txPacket.crc16,
+                      g_raw_v_bus,
+                      g_raw_i_shunt,
                       g_raw_shunt);
     }
 }
